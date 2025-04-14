@@ -1,103 +1,122 @@
-import Image from "next/image";
+"use client"
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Hexagon, Link2, Wallet } from "lucide-react"
+import NetworkBackground from "@/components/networkBackground"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter()
+  const [walletConnected, setWalletConnected] = useState(true)
+  const [selectedCursor, setSelectedCursor] = useState<number | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const cursors = ["/cursors/cursor1.png", "/cursors/cursor2.png", "/cursors/cursor3.png", "/cursors/cursor4.png"]
+
+  useEffect(() => {
+    // Fade-in animation on load
+    setIsVisible(true)
+  }, [])
+
+
+  const handleCursorSelect = (index: number) => {
+    setSelectedCursor(index)
+  }
+
+  const handleContinue = () => {
+    if (walletConnected && selectedCursor !== null) {
+      // Fade-out animation before navigation
+      setIsVisible(false)
+      setTimeout(() => {
+        localStorage.setItem("selectedCursor", cursors[selectedCursor])
+        router.push("/maze")
+      }, 500)
+    }
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-black overflow-hidden">
+      <NetworkBackground />
+
+      <div
+        className={`relative z-10 w-full max-w-md px-4 transition-all duration-1000 ease-in-out transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+      >
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 animate-pulse-slow">
+          <Hexagon className="w-24 h-24 text-blue-500 opacity-50" />
+          <Link2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-blue-300" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+
+        <Card className="border border-blue-900/50 bg-black/80 backdrop-blur-sm shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)]">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center text-white animate-fade-in">Maze</CardTitle>
+            <CardDescription className="text-center text-blue-300 animate-fade-in-delay">
+              Connect your wallet and choose your cursor to continue
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4 animate-fade-in-delay-2">
+              <h3 className="text-md font-medium text-blue-300">Step 1: Connect Wallet</h3>
+              <div className="flex justify-center">
+                <ConnectButton />
+              </div>
+            </div>
+
+            <div
+              className={`space-y-4 transition-all duration-500 ${walletConnected
+                  ? "opacity-100 transform translate-y-0"
+                  : "opacity-50 pointer-events-none transform translate-y-4"
+                }`}
+            >
+              <h3 className="text-md font-medium text-blue-300">Step 2: Choose Your Cursor</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {cursors.map((cursor, index) => (
+                  <div
+                    key={index}
+                    className={`
+                      relative p-4 border rounded-lg cursor-pointer transition-all duration-300
+                      ${selectedCursor === index
+                        ? "border-blue-500 bg-blue-900/20 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                        : "border-gray-800 hover:border-blue-700 bg-gray-900/50 hover:bg-gray-900/80 hover:scale-[1.03]"
+                      }
+                    `}
+                    onClick={() => handleCursorSelect(index)}
+                  >
+                    <div className="flex items-center justify-center h-20">
+                      <Image
+                        src={cursor}
+                        alt={`Cursor ${index + 1}`}
+                        width={64}
+                        height={64}
+                        className="object-contain transition-transform duration-300 hover:scale-110"
+                      />
+                    </div>
+                    {selectedCursor === index && (
+                      <div className="absolute top-2 right-2 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              className={`
+                w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 
+                text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
+                ${walletConnected && selectedCursor !== null ? "animate-pulse-subtle" : ""}
+              `}
+              disabled={!walletConnected || selectedCursor === null}
+              onClick={handleContinue}
+            >
+              Continue to Maze
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </main>
+  )
 }
