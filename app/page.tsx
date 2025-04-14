@@ -13,6 +13,7 @@ export default function Home() {
   const [walletConnected, setWalletConnected] = useState(true)
   const [selectedCursor, setSelectedCursor] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [name, setName] = useState('')
 
   const cursors = ["/cursors/cursor1.png", "/cursors/cursor2.png", "/cursors/cursor3.png", "/cursors/cursor4.png"]
 
@@ -21,17 +22,21 @@ export default function Home() {
     setIsVisible(true)
   }, [])
 
-
   const handleCursorSelect = (index: number) => {
     setSelectedCursor(index)
   }
 
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value.trim())
+  }
+
   const handleContinue = () => {
-    if (walletConnected && selectedCursor !== null) {
+    if (walletConnected && selectedCursor !== null && name) {
       // Fade-out animation before navigation
       setIsVisible(false)
       setTimeout(() => {
         localStorage.setItem("selectedCursor", cursors[selectedCursor])
+        localStorage.setItem("name", name) // Save the name
         router.push("/maze")
       }, 500)
     }
@@ -65,13 +70,28 @@ export default function Home() {
               </div>
             </div>
 
+            {walletConnected && (
+              <div className="space-y-4 animate-fade-in-delay-2">
+                <h3 className="text-md font-medium text-blue-300">Step 2: Enter Your Name</h3>
+                <div className="flex justify-center">
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={name}
+                    onChange={handleNameChange}
+                    className="w-full p-2 border border-gray-700 rounded-lg bg-black text-white placeholder-gray-400"
+                  />
+                </div>
+              </div>
+            )}
+
             <div
               className={`space-y-4 transition-all duration-500 ${walletConnected
                   ? "opacity-100 transform translate-y-0"
                   : "opacity-50 pointer-events-none transform translate-y-4"
                 }`}
             >
-              <h3 className="text-md font-medium text-blue-300">Step 2: Choose Your Cursor</h3>
+              <h3 className="text-md font-medium text-blue-300">Step 3: Choose Your Cursor</h3>
               <div className="grid grid-cols-2 gap-4">
                 {cursors.map((cursor, index) => (
                   <div
@@ -107,9 +127,9 @@ export default function Home() {
               className={`
                 w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 
                 text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
-                ${walletConnected && selectedCursor !== null ? "animate-pulse-subtle" : ""}
+                ${walletConnected && selectedCursor !== null && name ? "animate-pulse-subtle" : ""}
               `}
-              disabled={!walletConnected || selectedCursor === null}
+              disabled={!walletConnected || selectedCursor === null || !name}
               onClick={handleContinue}
             >
               Continue to Maze
