@@ -1,3 +1,4 @@
+import { CursorPosition } from "@/app/maze/page";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -5,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function handleSocket(userId: string, username: string, curPos: any, myId: string | null, currImg:string|null) {
+export function handleSocket(userId: string, username: string, curPos: CursorPosition, myId: string | null, currImg:string|null) {
   const maze = document.getElementById("MAZE");
   if (userId == myId) return;
 
