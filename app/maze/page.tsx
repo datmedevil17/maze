@@ -49,13 +49,19 @@ export default function Dashboard() {
     ClientToServerEvents
   > | null>(null);
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const account = useAccount()
+  const account = useAccount();
+
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>("1f609");
   let myCursor: CursorPosition = { x: 0, y: 0 };
-
+  let walletId: string = "";
   // on connect
   useEffect(() => {
+    if (!account || !account.address) {
+      router.push("/");
+    }
+    if (account.address)
+      walletId = account.address;
     // Fade-in animation on load
     setIsVisible(true);
     // const socketInstance = io("http://172.70.103.241:3000");
@@ -70,7 +76,7 @@ export default function Dashboard() {
     setName(myname);
 
     socketInstance.on("connect", () => {
-      socketInstance.emit("join-room", { roomId: "maze", userId: myname });
+      socketInstance.emit("join-room", { roomId: "maze", userId: walletId });
     });
     // Apply the custom cursor to the body
     if (cursor) {
@@ -101,7 +107,7 @@ export default function Dashboard() {
       socket.off("remote-cursor-move");
       socket.off("user-left");
     };
-  }, [socket, name]); // Added name to dependency array
+  }, [socket, walletId]); // Added name to dependency array
 
   // my cursor movements
   useEffect(() => {
@@ -153,7 +159,7 @@ export default function Dashboard() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("scroll", emitOnScroll);
     };
-  }, [socket, name, selectedCursor, myCursor]); // Added selectedCursor to dependency array
+  }, [socket, walletId, selectedCursor, myCursor]); // Added selectedCursor to dependency array
 
   const handleBack = () => {
     setIsVisible(false);
@@ -164,7 +170,7 @@ export default function Dashboard() {
   const handleEmojiSelect = (unicodeValue: string) => {
     setSelectedEmoji(unicodeValue);
     if (socket)
-      socket.emit('emoji', { emojiText: unicodeValue, userId: name });
+      socket.emit('emoji', { emojiText: unicodeValue, userId: walletId });
     setIsDropdownOpen(false);
   };
   const toggleDropdown = () => {
@@ -184,6 +190,14 @@ export default function Dashboard() {
         height={4896}
         className="full z-[5]" // optional styling
       /> */}
+      <div className="emojiSelector p-6 text-center text-xl fixed top-0 left-1/2 translate-x-[-50%]">
+        <EmojiDropdown
+          isDropdownOpen={isDropdownOpen}
+          toggleDropdown={toggleDropdown}
+          selectedEmoji={selectedEmoji}
+          handleEmojiSelect={handleEmojiSelect}
+        />
+      </div>
       <div
         className={`fixed top-0 left-0 z-10 text-center space-y-6 max-w-md p-6 transition-all duration-1000 ease-in-out transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}

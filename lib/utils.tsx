@@ -52,9 +52,6 @@ export function handleSocket(userId: string, username: string, curPos: CursorPos
 export function handleUserLeft(userId: string) {
   const maze = document.getElementById("MAZE");
   const childElement = maze?.querySelector<HTMLDivElement>(`#${CSS.escape(userId)}`)
-  console.log(CSS.escape(userId))
-  console.log(userId)
-  console.log(childElement)
   if (childElement) childElement.remove();
 }
 
