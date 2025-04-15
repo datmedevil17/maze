@@ -22,8 +22,8 @@ export function handleSocket(userId: string, username: string, curPos: CursorPos
   
   if (childElement) {
     // Update position if cursor element already exists
-    childElement.style.top = `${curPos.y - 40}px`
-    childElement.style.left = `${curPos.x - 17}px`
+    childElement.style.top = `${curPos.y}px`
+    childElement.style.left = `${curPos.x}px`
   } else {
     
     // Create new cursor element
@@ -32,8 +32,8 @@ export function handleSocket(userId: string, username: string, curPos: CursorPos
     childElement.className = "otherCursor"
     // Position the new cursor
     childElement.style.position = "absolute"
-    childElement.style.top = `${curPos.y - 40}px`
-    childElement.style.left = `${curPos.x - 17}px`
+    childElement.style.top = `${curPos.y}px`
+    childElement.style.left = `${curPos.x}px`
 
     // Optional: Style cursor
     childElement.style.width = "40px"
@@ -59,14 +59,11 @@ export function handleEmojiChange(emoji: EmojiData) {
   if (maze) {
     const childElement = maze.querySelector(`#${CSS.escape(emoji.userId)}`) as HTMLElement | null;
 
-    console.log(emoji)
-    console.log(childElement)
     if (childElement) {
       const existingEmojii = childElement.querySelector(`.emojii-${CSS.escape(emoji.userId)}`) as HTMLElement | null;
-      console.log(existingEmojii)
       if (!existingEmojii) {
         const emojiel = document.createElement('div');
-        emojiel.className = `emojii-${(emoji.userId)}`;
+        emojiel.className = `emojii-${(emoji.userId)} w-[70px] h-[70px]`;
 
         const root = ReactDOM.createRoot(emojiel);
         root.render(<EmojiDisplay selectedEmoji={emoji.emojiText} />);
@@ -83,7 +80,7 @@ export function handleEmojiChange(emoji: EmojiData) {
         existingEmojii.remove();
 
         const emojiel = document.createElement('div');
-        emojiel.className = `emojii-${(emoji.userId)}`;
+        emojiel.className = `emojii-${(emoji.userId)} w-[70px] h-[70px]`;
 
         const root = ReactDOM.createRoot(emojiel);
         root.render((<EmojiDisplay selectedEmoji={emoji.emojiText} />));
