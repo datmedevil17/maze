@@ -4,17 +4,24 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import NetworkBackground from "@/components/networkBackground"
-import { handleSocket, handleUserLeft } from "@/lib/utils"
+import { handleSocket, handleUserLeft, handleEmojiChange } from "@/lib/utils"
 import { io } from "socket.io-client";
+import { EmojiDropdown } from "@/components/emojiSelector"
 import Image from "next/image";
 
+interface CursorPosition {
+  x: number;
+  y: number;
+}
 export default function Dashboard() {
   const router = useRouter()
   const [selectedCursor, setSelectedCursor] = useState<string | null>(null)
   const [name, setName] = useState<string | null>(null)
   const [socket, setSocket] = useState<any | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
-  let myCursor = { x: 0, y: 0 }
+  const [isVisible, setIsVisible] = useState<boolean>(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [selectedEmoji, setSelectedEmoji] = useState<string>("1f609");
+  let myCursor: CursorPosition = { x: 0, y: 0 };
 
   // on connect
   useEffect(() => {
@@ -34,7 +41,7 @@ export default function Dashboard() {
     });
     // Apply the custom cursor to the body
     if (cursor) {
-      document.body.style.cursor = `url('${cursor}') 16 16, auto`
+      document.body.style.cursor = `url('${cursor}') 0 0, auto`
     }
     return () => {
       socketInstance.disconnect();
@@ -42,7 +49,7 @@ export default function Dashboard() {
 
   }, [])
 
-  // other cursor movements
+  // listening sockets
   useEffect(() => {
     if (!socket) return;
 
@@ -51,6 +58,9 @@ export default function Dashboard() {
     });
     socket.on("user-left", (userId: string) => {
       handleUserLeft(userId);
+    });
+    socket.on("emoji-changed", (emoji: any) => {
+      handleEmojiChange(emoji);
     });
     return () => {
       socket.off("remote-cursor-move")
@@ -104,6 +114,14 @@ export default function Dashboard() {
       router.push("/")
     }, 500)
   }
+  const handleEmojiSelect = (unicodeValue:string) => {
+    setSelectedEmoji(unicodeValue);
+    socket.emit('emoji', { emojiText: unicodeValue, userId: name });
+    setIsDropdownOpen(false);
+  };
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prevIsOpen) => !prevIsOpen);
+  };
 
   return (
     <main id="MAZE" className="min-h-screen flex flex-col items-center justify-center bg-black overflow-hidden  w-[7344px] h-[4896px]">
@@ -115,6 +133,15 @@ export default function Dashboard() {
         height={4896}
         className="full z-[5]" // optional styling
       /> */}
+
+      <div className="emojiSelector fixed top-0 left-1/2 p-6 translate-x-[-50%] text-center text-xl">
+        <EmojiDropdown
+          isDropdownOpen={isDropdownOpen}
+          toggleDropdown={toggleDropdown}
+          selectedEmoji={selectedEmoji}
+          handleEmojiSelect={handleEmojiSelect}
+        />
+      </div>
       <div
         className={`fixed top-0 left-0 z-10 text-center space-y-6 max-w-md p-6 transition-all duration-1000 ease-in-out transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
