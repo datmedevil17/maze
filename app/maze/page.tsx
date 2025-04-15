@@ -10,6 +10,7 @@ import { EmojiDropdown } from "@/components/emojiSelector"
 import { useAccount } from "wagmi";
 
 
+
 // Define proper socket and cursor types
 interface ServerToClientEvents {
   "remote-cursor-move": (data: {
@@ -165,6 +166,7 @@ export default function Dashboard() {
     }, 500)
   }
   const handleEmojiSelect = (unicodeValue: string) => {
+
     setSelectedEmoji(unicodeValue);
     if (socket)
       socket.emit('emoji', { emojiText: unicodeValue, userId: walletId.current });
