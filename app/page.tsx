@@ -187,7 +187,7 @@ export default function Home() {
               </div>
             </div>
 
-            {account.isConnected && (
+         
               <div className="space-y-4 animate-fade-in-delay-2">
                 <h3 className="text-md font-medium text-blue-300">
                   Step 2: Enter Your Name
@@ -202,7 +202,7 @@ export default function Home() {
                   />
                 </div>
               </div>
-            )}
+            
 
             <div
               className={`space-y-4 transition-all duration-500 ${
