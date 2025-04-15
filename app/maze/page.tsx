@@ -90,7 +90,7 @@ export default function Dashboard() {
     socket.on(
       "remote-cursor-move",
       ({ userId, username, cursorPos, currImg }) => {
-        handleSocket(userId, username, cursorPos, name, currImg);
+        handleSocket(userId, username, cursorPos, walletId.current, currImg);
       }
     );
     socket.on("user-left", (userId: string) => {
@@ -103,7 +103,7 @@ export default function Dashboard() {
       socket.off("remote-cursor-move");
       socket.off("user-left");
     };
-  }, [socket, name]); // Added name to dependency array
+  }, [socket]); // Added name to dependency array
 
   // my cursor movements
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function Dashboard() {
 
       socket.emit("cursor-move", {
         roomId: "maze",
-        userId: name,
+        userId: walletId.current,
         username: name,
         cursorPos,
         currImg: selectedCursor,
@@ -142,7 +142,7 @@ export default function Dashboard() {
 
       socket.emit("cursor-move", {
         roomId: "maze",
-        userId: name,
+        userId: walletId.current,
         username: name,
         cursorPos,
         currImg: selectedCursor,

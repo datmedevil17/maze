@@ -6,7 +6,7 @@ import { EmojiDisplay } from '../components/emojiSelector';
 import React from "react";
 
 
-export type EmojiData ={
+export type EmojiData = {
   userId: string;
   emojiText: string;
 }
@@ -14,23 +14,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function handleSocket(userId: string, username: string, curPos: CursorPosition, myId: string | null, currImg: string | null) {
+export function handleSocket(userId: string, username: string, curPos: CursorPosition, myId: string, currImg: string | null) {
   const maze = document.getElementById("MAZE");
   if (userId == myId) return;
-
+  
   let childElement = maze?.querySelector<HTMLDivElement>(`#${CSS.escape(userId)}`)
-
+  
   if (childElement) {
     // Update position if cursor element already exists
     childElement.style.top = `${curPos.y - 40}px`
     childElement.style.left = `${curPos.x - 17}px`
   } else {
-
+    
     // Create new cursor element
     childElement = document.createElement("div")
     childElement.id = userId
     childElement.className = "otherCursor"
-
     // Position the new cursor
     childElement.style.position = "absolute"
     childElement.style.top = `${curPos.y - 40}px`
@@ -51,25 +50,26 @@ export function handleSocket(userId: string, username: string, curPos: CursorPos
 
 export function handleUserLeft(userId: string) {
   const maze = document.getElementById("MAZE");
-  const childElement = maze?.querySelector<HTMLDivElement>(`#${CSS.escape(userId)}`)
+  const childElement = userId ? maze?.querySelector<HTMLDivElement>(`#${CSS.escape(userId)}`) : null;
   if (childElement) childElement.remove();
 }
 
 export function handleEmojiChange(emoji: EmojiData) {
   const maze = document.getElementById("MAZE");
-
   if (maze) {
     const childElement = maze.querySelector(`#${CSS.escape(emoji.userId)}`) as HTMLElement | null;
 
+    console.log(emoji)
+    console.log(childElement)
     if (childElement) {
       const existingEmojii = childElement.querySelector(`.emojii-${CSS.escape(emoji.userId)}`) as HTMLElement | null;
-
+      console.log(existingEmojii)
       if (!existingEmojii) {
         const emojiel = document.createElement('div');
-        emojiel.className = `emojii-${CSS.escape(emoji.userId)}`;
+        emojiel.className = `emojii-${(emoji.userId)}`;
 
         const root = ReactDOM.createRoot(emojiel);
-        root.render(<EmojiDisplay selectedEmoji={ emoji.emojiText } />);
+        root.render(<EmojiDisplay selectedEmoji={emoji.emojiText} />);
         childElement.appendChild(emojiel);
 
         setTimeout(() => {
@@ -83,10 +83,10 @@ export function handleEmojiChange(emoji: EmojiData) {
         existingEmojii.remove();
 
         const emojiel = document.createElement('div');
-        emojiel.className = `emojii-${CSS.escape(emoji.userId)}`;
+        emojiel.className = `emojii-${(emoji.userId)}`;
 
         const root = ReactDOM.createRoot(emojiel);
-        root.render((<EmojiDisplay selectedEmoji={ CSS.escape(emoji.emojiText) } />));
+        root.render((<EmojiDisplay selectedEmoji={emoji.emojiText} />));
         childElement.appendChild(emojiel);
 
         setTimeout(() => {
