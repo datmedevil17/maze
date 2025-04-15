@@ -1,10 +1,12 @@
 import { clsx, type ClassValue } from "clsx"
+import { CursorPosition } from "../app/maze/page";
 import { twMerge } from "tailwind-merge"
 import ReactDOM from 'react-dom/client';
-import { EmojiDisplay } from '@/components/emojiSelector';
+import { EmojiDisplay } from '../components/emojiSelector';
+import React from "react";
 
 
-interface EmojiData {
+export type EmojiData ={
   userId: string;
   emojiText: string;
 }
@@ -12,7 +14,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function handleSocket(userId: string, username: string, curPos: any, myId: string | null, currImg: string | null) {
+export function handleSocket(userId: string, username: string, curPos: CursorPosition, myId: string | null, currImg: string | null) {
   const maze = document.getElementById("MAZE");
   if (userId == myId) return;
 
