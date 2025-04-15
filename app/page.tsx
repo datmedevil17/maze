@@ -28,8 +28,7 @@ export default function Home() {
           message: "Sign this message to authenticate with the dApp.",
         });
 
-        // console.log('User address:', account.address);
-        // console.log('Signature:', signature);
+        console.log('Signature:', signature);
 
         // You can send this to your backend for verification if needed
         setSigned(true);
@@ -41,7 +40,7 @@ export default function Home() {
     if (account.isConnected && !signed) {
       signUser();
     }
-  }, [account.isConnected, signed]);
+  }, [account.isConnected, signed,signMessageAsync]);
 
   
   useEffect(() => {

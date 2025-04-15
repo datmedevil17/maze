@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import NetworkBackground from "@/components/networkBackground";
 import { handleSocket, handleUserLeft, handleEmojiChange, EmojiData } from "@/lib/utils";
 import { io, Socket } from "socket.io-client";
 import { EmojiDropdown } from "@/components/emojiSelector"
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount } from "wagmi";
 
 
 // Define proper socket and cursor types
@@ -44,24 +44,20 @@ export default function Dashboard() {
   const router = useRouter();
   const [selectedCursor, setSelectedCursor] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
-  const [socket, setSocket] = useState<Socket<
-    ServerToClientEvents,
-    ClientToServerEvents
-  > | null>(null);
+  const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const account = useAccount();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string>("1f609");
-  let myCursor: CursorPosition = { x: 0, y: 0 };
-  let walletId: string = "";
+  const walletId = useRef<string>("");
   // on connect
   useEffect(() => {
     if (!account || !account.address) {
       router.push("/");
     }
     if (account.address)
-      walletId = account.address;
+      walletId.current = account.address;
     // Fade-in animation on load
     setIsVisible(true);
     // const socketInstance = io("http://172.70.103.241:3000");
@@ -76,7 +72,7 @@ export default function Dashboard() {
     setName(myname);
 
     socketInstance.on("connect", () => {
-      socketInstance.emit("join-room", { roomId: "maze", userId: walletId });
+      socketInstance.emit("join-room", { roomId: "maze", userId: walletId.current });
     });
     // Apply the custom cursor to the body
     if (cursor) {
@@ -85,7 +81,7 @@ export default function Dashboard() {
     return () => {
       socketInstance.disconnect();
     };
-  }, []);
+  }, [account, router]);
 
   // listening sockets
   useEffect(() => {
@@ -107,11 +103,12 @@ export default function Dashboard() {
       socket.off("remote-cursor-move");
       socket.off("user-left");
     };
-  }, [socket, walletId]); // Added name to dependency array
+  }, [socket, name]); // Added name to dependency array
 
   // my cursor movements
   useEffect(() => {
     if (!socket) return;
+    const myCursor: CursorPosition = { x: 0, y: 0 };
 
     const handleMouseMove = (event: MouseEvent) => {
       const htmlElem = document.documentElement;
@@ -159,7 +156,7 @@ export default function Dashboard() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("scroll", emitOnScroll);
     };
-  }, [socket, walletId, selectedCursor, myCursor]); // Added selectedCursor to dependency array
+  }, [socket, name, selectedCursor]); // Added selectedCursor to dependency array
 
   const handleBack = () => {
     setIsVisible(false);
@@ -170,7 +167,7 @@ export default function Dashboard() {
   const handleEmojiSelect = (unicodeValue: string) => {
     setSelectedEmoji(unicodeValue);
     if (socket)
-      socket.emit('emoji', { emojiText: unicodeValue, userId: walletId });
+      socket.emit('emoji', { emojiText: unicodeValue, userId: walletId.current });
     setIsDropdownOpen(false);
   };
   const toggleDropdown = () => {
