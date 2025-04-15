@@ -7,18 +7,43 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Hexagon, Link2 } from "lucide-react"
 import NetworkBackground from "@/components/networkBackground"
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
+
+
 
 export default function Home() {
   const router = useRouter()
-
+  const { signMessageAsync } = useSignMessage();
+  const [signed, setSigned] = useState(false);
   const account = useAccount()
   const [selectedCursor, setSelectedCursor] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState<boolean>(false)
   const [name, setName] = useState('')
 
   const cursors = ["/cursors/cursor1.png", "/cursors/cursor2.png", "/cursors/cursor3.png", "/cursors/cursor4.png"]
+  useEffect(() => {
+    const signUser = async () => {
+      try {
+        const signature = await signMessageAsync({
+          message: "Sign this message to authenticate with the dApp.",
+        });
 
+        console.log('User address:', account.address);
+        console.log('Signature:', signature);
+
+        // You can send this to your backend for verification if needed
+        setSigned(true);
+      } catch (error) {
+        console.error('User rejected the signature:', error);
+      }
+    };
+
+    if (account.isConnected && !signed) {
+      signUser();
+    }
+  }, [account.isConnected, signed]);
+
+  
   useEffect(() => {
     
     setIsVisible(true)
