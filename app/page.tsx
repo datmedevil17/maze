@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Hexagon, Link2, Wallet } from "lucide-react"
+import { Hexagon, Link2 } from "lucide-react"
 import NetworkBackground from "@/components/networkBackground"
 
 export default function Home() {
   const router = useRouter()
-  const [walletConnected, setWalletConnected] = useState(true)
+  const walletConnected = true
   const [selectedCursor, setSelectedCursor] = useState<number | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState<boolean>(false)
   const [name, setName] = useState('')
 
   const cursors = ["/cursors/cursor1.png", "/cursors/cursor2.png", "/cursors/cursor3.png", "/cursors/cursor4.png"]
@@ -41,6 +41,7 @@ export default function Home() {
       }, 500)
     }
   }
+
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-black overflow-hidden">
