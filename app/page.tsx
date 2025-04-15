@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Hexagon, Link2 } from "lucide-react"
 import NetworkBackground from "@/components/networkBackground"
+import { useAccount } from "wagmi";
 
 export default function Home() {
   const router = useRouter()
-  const walletConnected = true
+
+  const account = useAccount()
   const [selectedCursor, setSelectedCursor] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState<boolean>(false)
   const [name, setName] = useState('')
@@ -18,9 +20,9 @@ export default function Home() {
   const cursors = ["/cursors/cursor1.png", "/cursors/cursor2.png", "/cursors/cursor3.png", "/cursors/cursor4.png"]
 
   useEffect(() => {
-    // Fade-in animation on load
+    
     setIsVisible(true)
-  }, [])
+  }, [account])
 
   const handleCursorSelect = (index: number) => {
     setSelectedCursor(index)
@@ -31,7 +33,7 @@ export default function Home() {
   }
 
   const handleContinue = () => {
-    if (walletConnected && selectedCursor !== null && name) {
+    if (account.isConnected && selectedCursor !== null && name) {
       // Fade-out animation before navigation
       setIsVisible(false)
       setTimeout(() => {
@@ -71,7 +73,7 @@ export default function Home() {
               </div>
             </div>
 
-            {walletConnected && (
+            {account.isConnected && (
               <div className="space-y-4 animate-fade-in-delay-2">
                 <h3 className="text-md font-medium text-blue-300">Step 2: Enter Your Name</h3>
                 <div className="flex justify-center">
@@ -87,7 +89,7 @@ export default function Home() {
             )}
 
             <div
-              className={`space-y-4 transition-all duration-500 ${walletConnected
+              className={`space-y-4 transition-all duration-500 ${account.isConnected
                   ? "opacity-100 transform translate-y-0"
                   : "opacity-50 pointer-events-none transform translate-y-4"
                 }`}
@@ -128,9 +130,9 @@ export default function Home() {
               className={`
                 w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 
                 text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
-                ${walletConnected && selectedCursor !== null && name ? "animate-pulse-subtle" : ""}
+                ${account.isConnected && selectedCursor !== null && name ? "animate-pulse-subtle" : ""}
               `}
-              disabled={!walletConnected || selectedCursor === null || !name}
+              disabled={!account.isConnected || selectedCursor === null || !name}
               onClick={handleContinue}
             >
               Continue to Maze
