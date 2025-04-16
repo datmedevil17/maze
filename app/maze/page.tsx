@@ -7,7 +7,9 @@ import NetworkBackground from "@/components/networkBackground";
 import { handleSocket, handleUserLeft, handleEmojiChange, EmojiData } from "@/lib/utils";
 import { io, Socket } from "socket.io-client";
 import { EmojiDropdown } from "@/components/emojiSelector"
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
+import {tokenABI,tokenAddress} from "@/contract/contract"
+import { formatUnits } from "viem";
 
 
 
@@ -53,6 +55,20 @@ export default function Dashboard() {
   const [selectedEmoji, setSelectedEmoji] = useState<string>("1f609");
   const walletId = useRef<string>("");
   // on connect
+  const { data, isLoading, error } = useReadContract({
+    address: tokenAddress,
+    abi: tokenABI,
+    functionName: 'balanceOf',
+    args: [account.address!],
+  })
+  const [balance, setBalance] = useState('0')
+  
+  useEffect(() => {
+    if (data && typeof data === 'bigint') {
+      setBalance(formatUnits(data, 18)) // 18 is typical for ERC-20
+    }
+  }, [data])
+
   useEffect(() => {
     if (!account || !account.address) {
       router.push("/");
@@ -206,6 +222,11 @@ export default function Dashboard() {
           className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delay-3"
         >
           Back to Login
+        </Button>
+        <Button
+          className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delay-3"
+        >
+          {balance}
         </Button>
       </div>
     </main>
