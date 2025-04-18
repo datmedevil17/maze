@@ -8,6 +8,7 @@ import { handleSocket, handleUserLeft, handleEmojiChange, EmojiData } from "@/li
 import { io, Socket } from "socket.io-client";
 import { EmojiDropdown } from "@/components/emojiSelector"
 import { useAccount } from "wagmi";
+import Image from "next/image";
 
 
 // Define proper socket and cursor types
@@ -177,7 +178,7 @@ export default function Dashboard() {
   return (
     <main
       id="MAZE"
-      className="min-h-screen flex flex-col items-center justify-center bg-black overflow-hidden  w-[7344px] h-[4896px]"
+      className="relative min-h-screen flex flex-col items-center justify-center bg-black overflow-hidden  w-[8000px] h-[8000px]"
     >
       <NetworkBackground />
       {/* <Image
