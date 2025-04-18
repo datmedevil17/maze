@@ -102,7 +102,7 @@ export default function Home() {
         });
       }
     }
-  }, [nftBalance, authState]);
+  }, [nftBalance, authState, mintNFT]);
   
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function Home() {
         functionName: "claimReward",
       });
     }
-  }, [nftMinted]);
+  }, [nftMinted, claimReward]);
 
   useEffect(() => {
     if (tokensMinted) {

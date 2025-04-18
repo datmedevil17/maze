@@ -8,10 +8,9 @@ import { handleSocket, handleUserLeft, handleEmojiChange, EmojiData } from "@/li
 import { io, Socket } from "socket.io-client";
 import { EmojiDropdown } from "@/components/emojiSelector"
 import { useAccount, useReadContract } from "wagmi";
-import {tokenABI,tokenAddress} from "@/contract/contract"
+import { tokenABI, tokenAddress } from "@/contract/contract"
 import { formatUnits } from "viem";
-
-import Image from "next/image";
+import SpaceShooterGame from "../games/spaceShooter/page";
 
 
 // Define proper socket and cursor types
@@ -56,14 +55,14 @@ export default function Dashboard() {
   const [selectedEmoji, setSelectedEmoji] = useState<string>("1f609");
   const walletId = useRef<string>("");
   // on connect
-  const { data, isLoading, error } = useReadContract({
+  const { data } = useReadContract({
     address: tokenAddress,
     abi: tokenABI,
     functionName: 'balanceOf',
     args: [account.address!],
   })
   const [balance, setBalance] = useState('0')
-  
+
   useEffect(() => {
     if (data && typeof data === 'bigint') {
       setBalance(formatUnits(data, 18)) // 18 is typical for ERC-20
@@ -176,12 +175,12 @@ export default function Dashboard() {
     };
   }, [socket, name, selectedCursor]); // Added selectedCursor to dependency array
 
-  const handleBack = () => {
-    setIsVisible(false);
-    setTimeout(() => {
-      router.push("/")
-    }, 500)
-  }
+  // const handleBack = () => {
+  //   setIsVisible(false);
+  //   setTimeout(() => {
+  //     router.push("/")
+  //   }, 500)
+  // }
   const handleEmojiSelect = (unicodeValue: string) => {
 
     setSelectedEmoji(unicodeValue);
@@ -194,42 +193,36 @@ export default function Dashboard() {
   };
 
   return (
-    <main
-      id="MAZE"
-      className="relative min-h-screen flex flex-col items-center justify-center bg-black overflow-hidden  w-[8000px] h-[8000px]"
-    >
-      <NetworkBackground />
-      {/* <Image
-        src="/bgMap.png" // or external URL
-        alt=""
-        width={7344}
-        height={4896}
-        className="full z-[5]" // optional styling
-      /> */}
-      <div className="emojiSelector p-6 text-center text-xl fixed top-0 left-1/2 translate-x-[-50%]">
-        <EmojiDropdown
-          isDropdownOpen={isDropdownOpen}
-          toggleDropdown={toggleDropdown}
-          selectedEmoji={selectedEmoji}
-          handleEmojiSelect={handleEmojiSelect}
-        />
-      </div>
-      <div
-        className={`fixed top-0 left-0 z-10 text-center space-y-6 max-w-md p-6 transition-all duration-1000 ease-in-out transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-      >
-        <Button
-          onClick={handleBack}
-          className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delay-3"
+    <div className="relative  min-h-screen h-screen bg-black">
+      <div className="relative w-2/3 h-full inline-block overflow-scroll">
+        <main
+          id="MAZE"
+          className="relative min-h-screen bg-black overflow-scroll  w-[8000px] h-[8000px]"
         >
-          Back to Login
-        </Button>
-        <Button
-          className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delay-3"
-        >
-          {balance}
-        </Button>
+          <NetworkBackground />
+          <div className="emojiSelector p-6 text-center text-xl fixed top-0 left-1/3 translate-x-[-50%]">
+            <EmojiDropdown
+              isDropdownOpen={isDropdownOpen}
+              toggleDropdown={toggleDropdown}
+              selectedEmoji={selectedEmoji}
+              handleEmojiSelect={handleEmojiSelect}
+            />
+          </div>
+          <div
+            className={`fixed top-0 left-0 z-10 text-center space-y-6 max-w-md p-6 transition-all duration-1000 ease-in-out transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
+          >
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delay-3"
+            >
+              Balance tokens : {balance}
+            </Button>
+          </div>
+        </main>
       </div>
-    </main>
+      <div className="gameContainer w-1/3 h-full inline-block">
+        <SpaceShooterGame />
+      </div>
+    </div>
   );
 }

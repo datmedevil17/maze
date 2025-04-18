@@ -1102,12 +1102,12 @@ interface EmojiDropdownProps {
       emojis?.find((emoji) => emoji.key === selectedEmoji)?.value || "";
   
     return (
-      <div className={`emoji-dropdown inn ${isDropdownOpen ? "open" : ""}`}>
+      <div className={`emoji-dropdown flex flex-col justify-center items-center inn ${isDropdownOpen ? "open" : ""}`}>
         <div className="emoji-dropdown-trigger" onClick={toggleDropdown}>
           {currentEmoji}
         </div>
         {isDropdownOpen && (
-          <div className="emoji-list">
+          <div className="emoji-list w-4/5 text-center">
             {emojis.map(({ key, value }) => (
               <span
                 key={key}
