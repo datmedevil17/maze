@@ -72,9 +72,9 @@ export default function Dashboard() {
   }, [data])
 
   useEffect(() => {
-    // if (!account || !account.address) {
-    //   router.push("/");
-    // }
+    if (!account || !account.address) {
+      router.push("/");
+    }
     if (account.address)
       walletId.current = account.address;
     // Fade-in animation on load
