@@ -10,6 +10,7 @@ import { EmojiDropdown } from "@/components/emojiSelector"
 import { useAccount, useReadContract } from "wagmi";
 import { tokenABI, tokenAddress } from "@/contract/contract"
 import { formatUnits } from "viem";
+import TextPressure from "@/src/blocks/TextAnimations/TextPressure/TextPressure";
 import SpaceShooterGame from "../games/spaceShooter/page";
 
 
@@ -212,6 +213,23 @@ export default function Dashboard() {
           </div>
           <div className="absolute top-[250px] left-[500px] w-96 h-96 flex items-center justify-center border-2" onClick={() => setSelectedRightElement("spaceShooter")}>
             <h1 className="text-white text-4xl font-bold">Space Shooter Game</h1>
+          </div>
+          <div className="absolute top-[250px] left-[3200px] w-96 h-96 flex items-center justify-center border-2" onClick={() => setSelectedRightElement("spaceShooter")}>
+            <h1 className="text-white text-4xl font-bold">Space Shooter Game</h1>
+          </div>
+          <div className="absolute top-[350px] left-[1000px] w-[2000px] h-32 flex items-center justify-center">
+            <TextPressure
+              text="----------------------"
+              flex={true}
+              alpha={false}
+              stroke={false}
+              width={true}
+              weight={true}
+              italic={true}
+              textColor="#ffffff"
+              strokeColor="#ff0000"
+              minFontSize={80}
+            />
           </div>
           <div
             className={`fixed top-0 left-0 z-10 text-center space-y-6 max-w-md p-6 transition-all duration-1000 ease-in-out transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
