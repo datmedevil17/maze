@@ -19,9 +19,9 @@ interface Connection {
 }
 
 // Keep the virtual area large for the "infinite" effect
-const VIRTUAL_WIDTH = 4000
-const VIRTUAL_HEIGHT = 4000
-const NODE_COUNT = 300 // Adjust as needed
+const VIRTUAL_WIDTH = 8000
+const VIRTUAL_HEIGHT = 8000
+const NODE_COUNT = 500 // Adjust as needed
 
 const NetworkBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)

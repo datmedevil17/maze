@@ -63,6 +63,8 @@ export default function Dashboard() {
   })
   const [balance, setBalance] = useState('0')
 
+  const [selectedRightElement, setSelectedRightElement] = useState<string | null>(null);
+
   useEffect(() => {
     if (data && typeof data === 'bigint') {
       setBalance(formatUnits(data, 18)) // 18 is typical for ERC-20
@@ -70,9 +72,9 @@ export default function Dashboard() {
   }, [data])
 
   useEffect(() => {
-    if (!account || !account.address) {
-      router.push("/");
-    }
+    // if (!account || !account.address) {
+    //   router.push("/");
+    // }
     if (account.address)
       walletId.current = account.address;
     // Fade-in animation on load
@@ -193,8 +195,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="relative  min-h-screen h-screen bg-black">
-      <div className="relative w-2/3 h-full inline-block overflow-scroll">
+    <div className="relative  min-h-[99.3vh] h-[99.3vh] bg-black">
+      <div className={`relative h-full inline-block overflow-scroll ${selectedRightElement ? "w-2/3" : "w-full"}`}>
         <main
           id="MAZE"
           className="relative min-h-screen bg-black overflow-scroll  w-[8000px] h-[8000px]"
@@ -208,6 +210,9 @@ export default function Dashboard() {
               handleEmojiSelect={handleEmojiSelect}
             />
           </div>
+          <div className="absolute top-[250px] left-[500px] w-96 h-96 flex items-center justify-center border-2" onClick={() => setSelectedRightElement("spaceShooter")}>
+            <h1 className="text-white text-4xl font-bold">Space Shooter Game</h1>
+          </div>
           <div
             className={`fixed top-0 left-0 z-10 text-center space-y-6 max-w-md p-6 transition-all duration-1000 ease-in-out transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
@@ -218,11 +223,14 @@ export default function Dashboard() {
               Balance tokens : {balance}
             </Button>
           </div>
+
         </main>
       </div>
-      <div className="gameContainer w-1/3 h-full inline-block">
-        <SpaceShooterGame />
-      </div>
+      {selectedRightElement &&
+        <div className="gameContainer w-1/3 h-full inline-block relative">
+          {selectedRightElement === "spaceShooter" && <SpaceShooterGame /> || <div className="text-white">Global Chat</div>}
+        </div>
+      }
     </div>
   );
 }
