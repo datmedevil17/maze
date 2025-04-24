@@ -1,7 +1,10 @@
 import tokenAbi from "../abis/PlatformToken.json"
 import nftAbi from "../abis/PlatformNFT.json"
+import gameAbi from "../abis/GameContract.json"
 
 export const tokenABI = tokenAbi.abi;
 export const nftABI = nftAbi.abi;
-export const tokenAddress = "0xD98D9F17a42580368AA2E938D2b574f407f23C39";
-export const nftAddress = "0x14D313eed5C6F90410E0b9dc8fd89D93998f93C9";
+export const gameABI = gameAbi.abi;
+export const tokenAddress = "0xfEf38b0729eF5f2778c4d2230826c4c18f2237Ce";
+export const nftAddress = "0xbe5143aFfD4560Ca12d14E65f379F83862649880";
+export const gameContract = "0x35337A08fD6856E4986392cFf1e17Bf3A6093fb5";

@@ -49,11 +49,11 @@ export default function Home() {
       enabled: !!account.address, // ✅ correct location for `enabled`
     },
   });
-  const { writeContract: mintNFT, data: nftTxHash } = useWriteContract();
+  const { writeContract: createProfile, data: nftTxHash } = useWriteContract();
   const { isSuccess: nftMinted } = useWaitForTransactionReceipt({
     hash: nftTxHash,
   });
-  const { writeContract: claimReward, data: tokenTxHash } = useWriteContract();
+  const { writeContract: register, data: tokenTxHash } = useWriteContract();
   const { isSuccess: tokensMinted } = useWaitForTransactionReceipt({
     hash: tokenTxHash,
   });
@@ -94,26 +94,26 @@ export default function Home() {
         setAuthState("ready");
       } else {
         setAuthState("minting");
-        mintNFT({
+        createProfile({
           address: nftAddress,
           abi: nftABI,
-          functionName: "mint",
+          functionName: "createProfile",
           args: [], // ✅ make sure to include empty args if your mint function takes none
         });
       }
     }
-  }, [nftBalance, authState, mintNFT]);
+  }, [nftBalance, authState, createProfile]);
   
 
   useEffect(() => {
     if (nftMinted) {
-      claimReward({
+      register({
         address: tokenAddress,
         abi: tokenABI,
-        functionName: "claimReward",
+        functionName: "register",
       });
     }
-  }, [nftMinted, claimReward]);
+  }, [nftMinted, register]);
 
   useEffect(() => {
     if (tokensMinted) {
