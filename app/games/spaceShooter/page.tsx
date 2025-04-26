@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, use } from 'react';
 import * as THREE from 'three';
 
 // ... imports remain the same ...
@@ -12,6 +12,8 @@ import { ExplosionManager } from './utils/explosionManager';
 import { HighScoreManager } from './utils/highScoreManager';
 import ScoreDisplay from './components/ScoreDisplay';
 import GameOverOverlay from './components/GameOverOverlay';
+import RestartGameOverlay from './components/RestartGameOverlay';
+
 
 interface GameManagers {
     player: Player;
@@ -48,6 +50,8 @@ const SpaceShooterGame: React.FC = () => {
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
     const [isGameOver, setIsGameOver] = useState(false);
+    const [isStakeOverlay, setIsStakeOverlay] = useState(false);
+
     // Simplified state
     const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(LoadingStatus.WaitingForDimensions);
 
@@ -78,7 +82,7 @@ const SpaceShooterGame: React.FC = () => {
                 console.log("Initialization already attempted/completed.");
                 return;
             }
-            console.log(`Initializing THREE.js with ${width}x${height}`);
+            // console.log(`Initializing THREE.js with ${width}x${height}`);
             setLoadingStatus(LoadingStatus.Initializing); // Signal initialization start
             initAttemptedRef.current = true; // Mark attempt
 
@@ -116,7 +120,7 @@ const SpaceShooterGame: React.FC = () => {
 
                 didSetupSuccessfully = true;
                 setLoadingStatus(LoadingStatus.Ready); // Signal completion
-                console.log("Init Effect: THREE.js setup complete.");
+                // console.log("Init Effect: THREE.js setup complete.");
 
             } catch (error) {
                 console.error("Error during THREE.js initialization:", error);
@@ -399,7 +403,7 @@ const SpaceShooterGame: React.FC = () => {
     // --- Restart Game Handler (Memoized) ---
     const handleRestart = useCallback(() => {
         if (loadingStatus !== LoadingStatus.Ready || !managersRef.current) return;
-        console.log("Restarting game...");
+        // console.log("Restarting game...");
         setScore(0);
         setHighScore(managersRef.current.highScoreManager.getHighScore());
         // Reset managers
@@ -411,8 +415,15 @@ const SpaceShooterGame: React.FC = () => {
         managersRef.current.explosionManager.clearAll();
         // Set game over to false LAST
         setIsGameOver(false);
+        setIsStakeOverlay(false);
         console.log("Game Restarted.");
     }, [loadingStatus]);
+
+    // Restart Game stake overlay
+    const handleRestartStake = useCallback(()=>{
+        if (loadingStatus !== LoadingStatus.Ready || !managersRef.current) return;
+        setIsStakeOverlay(true);
+    },[loadingStatus]);
 
     // --- Render ---
     const getLoadingMessage = () => {
@@ -464,12 +475,18 @@ const SpaceShooterGame: React.FC = () => {
                      )}
                      {isGameOver && managersRef.current && (
                          <div className="pointer-events-auto">
+                            {isStakeOverlay &&
+                            <RestartGameOverlay
+                              onGameStartAttempted={handleRestart}/>
+                             ||
                               <GameOverOverlay
-                                 score={score}
-                                 highScore={highScore}
-                                 isNewHighScore={score > 0 && score === managersRef.current.highScoreManager.getHighScore()}
-                                 onRestart={handleRestart}
-                             />
+                              score={score}
+                              highScore={highScore}
+                              isNewHighScore={score > 0 && score === managersRef.current.highScoreManager.getHighScore()}
+                              onRestart={handleRestartStake}
+                              />
+                            }
+
                          </div>
                      )}
                  </div>

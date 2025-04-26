@@ -21,7 +21,7 @@ import {
   QueryClientProvider,
   QueryClient,
 } from "@tanstack/react-query";
-const config = getDefaultConfig({
+export const config = getDefaultConfig({
   appName: 'Maze ',
   projectId: 'YOUR_PROJECT_ID',
   chains: [mainnet, polygon, optimism, arbitrum, base, monadTestnet],

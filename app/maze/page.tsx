@@ -12,6 +12,7 @@ import { tokenABI, tokenAddress } from "@/contract/contract"
 import { formatUnits } from "viem";
 import TextPressure from "@/src/blocks/TextAnimations/TextPressure/TextPressure";
 import SpaceShooterGame from "../games/spaceShooter/page";
+import {startGame , endGame} from "@/contract/function"
 
 
 // Define proper socket and cursor types

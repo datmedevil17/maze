@@ -43,3 +43,11 @@ body {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
+@keyframes pulseCyanGlow {
+  0%, 100% { text-shadow: 0 0 5px rgba(0, 255, 255, 0.5), 0 0 10px rgba(0, 255, 255, 0.3); }
+  50% { text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.5); }
+}
+
+.animate-\[pulseCyanGlow_2s_infinite\] {
+  animation: pulseCyanGlow 2s infinite;
+}
