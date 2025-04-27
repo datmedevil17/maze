@@ -21,7 +21,8 @@ import {
   QueryClientProvider,
   QueryClient,
 } from "@tanstack/react-query";
-export const config = getDefaultConfig({
+
+const wagmiConfig = getDefaultConfig({
   appName: 'Maze ',
   projectId: 'YOUR_PROJECT_ID',
   chains: [mainnet, polygon, optimism, arbitrum, base, monadTestnet],
@@ -47,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body >
-        <WagmiProvider config={config}>
+        <WagmiProvider config={wagmiConfig}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider>
               <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback, use } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 
 // ... imports remain the same ...
@@ -13,6 +13,7 @@ import { HighScoreManager } from './utils/highScoreManager';
 import ScoreDisplay from './components/ScoreDisplay';
 import GameOverOverlay from './components/GameOverOverlay';
 import RestartGameOverlay from './components/RestartGameOverlay';
+import { endGame } from '@/contract/function';
 
 
 interface GameManagers {
@@ -49,8 +50,8 @@ const SpaceShooterGame: React.FC = () => {
 
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
-    const [isGameOver, setIsGameOver] = useState(false);
-    const [isStakeOverlay, setIsStakeOverlay] = useState(false);
+    const [isGameOver, setIsGameOver] = useState(true);
+    const [isStakeOverlay, setIsStakeOverlay] = useState(true);
 
     // Simplified state
     const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(LoadingStatus.WaitingForDimensions);
@@ -65,7 +66,7 @@ const SpaceShooterGame: React.FC = () => {
             console.warn("Setup Effect: Refs not ready.");
             // If already initialized somehow, reset (edge case during hot reload)
             if (loadingStatus !== LoadingStatus.WaitingForDimensions) {
-                 setLoadingStatus(LoadingStatus.WaitingForDimensions);
+                setLoadingStatus(LoadingStatus.WaitingForDimensions);
             }
             return;
         }
@@ -131,21 +132,21 @@ const SpaceShooterGame: React.FC = () => {
 
         // --- Resize Handler ---
         const handleResize = (width: number, height: number) => {
-             console.log(`Handling resize: ${width}x${height}`);
-             dimensionsRef.current = { width, height };
+            console.log(`Handling resize: ${width}x${height}`);
+            dimensionsRef.current = { width, height };
 
-             // Only resize renderer/camera if they exist (i.e., after setup)
-             if (rendererRef.current) rendererRef.current.setSize(width, height);
-             if (cameraRef.current) {
-                 const aspectRatio = width / height || 1;
-                 const cameraHeight = 100;
-                 const cameraWidth = cameraHeight * aspectRatio;
-                 cameraRef.current.left = -cameraWidth;
-                 cameraRef.current.right = cameraWidth;
-                 cameraRef.current.top = cameraHeight;
-                 cameraRef.current.bottom = -cameraHeight;
-                 cameraRef.current.updateProjectionMatrix();
-             }
+            // Only resize renderer/camera if they exist (i.e., after setup)
+            if (rendererRef.current) rendererRef.current.setSize(width, height);
+            if (cameraRef.current) {
+                const aspectRatio = width / height || 1;
+                const cameraHeight = 100;
+                const cameraWidth = cameraHeight * aspectRatio;
+                cameraRef.current.left = -cameraWidth;
+                cameraRef.current.right = cameraWidth;
+                cameraRef.current.top = cameraHeight;
+                cameraRef.current.bottom = -cameraHeight;
+                cameraRef.current.updateProjectionMatrix();
+            }
         };
 
         // --- Initial Measurement & Observer Setup ---
@@ -158,11 +159,11 @@ const SpaceShooterGame: React.FC = () => {
                 const { width, height } = entries[0].contentRect;
                 handleResize(width, height);
 
-                 // If waiting for dimensions and we get valid ones, AND init hasn't been done
-                 if (loadingStatus === LoadingStatus.WaitingForDimensions && width > 0 && height > 0 && !initAttemptedRef.current) {
-                     console.log("ResizeObserver provided dimensions, triggering init.");
-                     initializeThree(width, height);
-                 }
+                // If waiting for dimensions and we get valid ones, AND init hasn't been done
+                if (loadingStatus === LoadingStatus.WaitingForDimensions && width > 0 && height > 0 && !initAttemptedRef.current) {
+                    console.log("ResizeObserver provided dimensions, triggering init.");
+                    initializeThree(width, height);
+                }
             });
             resizeObserverRef.current.observe(container);
             console.log("ResizeObserver created and observing.");
@@ -172,24 +173,24 @@ const SpaceShooterGame: React.FC = () => {
             const initialHeight = container.offsetHeight;
             console.log(`Initial Measurement: ${initialWidth}x${initialHeight}`);
             if (initialWidth > 0 && initialHeight > 0) {
-                 // Store dimensions and trigger init immediately if possible
-                 dimensionsRef.current = { width: initialWidth, height: initialHeight };
-                 // Only initialize if still waiting and init not attempted
-                 if (loadingStatus === LoadingStatus.WaitingForDimensions && !initAttemptedRef.current) {
-                     initializeThree(initialWidth, initialHeight);
-                 } else {
+                // Store dimensions and trigger init immediately if possible
+                dimensionsRef.current = { width: initialWidth, height: initialHeight };
+                // Only initialize if still waiting and init not attempted
+                if (loadingStatus === LoadingStatus.WaitingForDimensions && !initAttemptedRef.current) {
+                    initializeThree(initialWidth, initialHeight);
+                } else {
                     // Dimensions already set, just ensure ref is up-to-date
                     handleResize(initialWidth, initialHeight);
-                 }
+                }
             } else {
                 console.warn("Initial container dimensions 0. Waiting for ResizeObserver.");
-                 // Ensure state remains WaitingForDimensions if it was Idle/Waiting
-                 setLoadingStatus(prev => {
+                // Ensure state remains WaitingForDimensions if it was Idle/Waiting
+                setLoadingStatus(prev => {
                     if (prev === LoadingStatus.WaitingForDimensions) {
                         return LoadingStatus.WaitingForDimensions;
                     }
                     return prev; // Don't revert from Initializing/Ready/Error
-                 });
+                });
             }
         };
 
@@ -200,47 +201,47 @@ const SpaceShooterGame: React.FC = () => {
         return () => {
             console.log("Cleaning up Setup Effect...");
             if (resizeObserverRef.current) {
-                 // Check ref before accessing current
-                 const observer = resizeObserverRef.current;
-                 // Unobserve container before disconnecting
-                 if (containerRef.current) {
-                     observer.unobserve(containerRef.current);
-                 }
-                 observer.disconnect();
-                 resizeObserverRef.current = null;
-                 console.log("ResizeObserver disconnected.");
-             }
+                // Check ref before accessing current
+                const observer = resizeObserverRef.current;
+                // Unobserve container before disconnecting
+                if (containerRef.current) {
+                    observer.unobserve(containerRef.current);
+                }
+                observer.disconnect();
+                resizeObserverRef.current = null;
+                console.log("ResizeObserver disconnected.");
+            }
 
             // Only dispose if setup within *this effect run* succeeded
             if (didSetupSuccessfully) {
                 console.log("Executing disposal logic...");
-                 // Stop loop first (handled by game loop effect cleanup)
-                 managersRef.current?.player?.dispose();
-                 managersRef.current?.enemyManager?.clearAll();
-                 managersRef.current?.bulletManager?.clearAll();
-                 managersRef.current?.powerUpManager?.dispose();
-                 managersRef.current?.explosionManager?.dispose();
-                 sceneRef.current?.clear();
-                 sceneRef.current?.traverse((object) => {
-                     if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
-                         object.geometry?.dispose();
-                         const materials = Array.isArray(object.material) ? object.material : [object.material];
-                         materials.forEach(mat => mat?.dispose());
-                     }
-                  });
-                 if (rendererRef.current) { // Check ref before accessing
-                     const currentRenderer = rendererRef.current;
-                     currentRenderer.dispose();
-                      // Use mountPoint ref for removal
-                     if (canvasMountRef.current && currentRenderer.domElement && canvasMountRef.current.contains(currentRenderer.domElement)) {
-                         canvasMountRef.current.removeChild(currentRenderer.domElement);
-                     }
-                 }
-                 rendererRef.current = null;
-                 sceneRef.current = null;
-                 cameraRef.current = null;
-                 managersRef.current = null;
-             }
+                // Stop loop first (handled by game loop effect cleanup)
+                managersRef.current?.player?.dispose();
+                managersRef.current?.enemyManager?.clearAll();
+                managersRef.current?.bulletManager?.clearAll();
+                managersRef.current?.powerUpManager?.dispose();
+                managersRef.current?.explosionManager?.dispose();
+                sceneRef.current?.clear();
+                sceneRef.current?.traverse((object) => {
+                    if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
+                        object.geometry?.dispose();
+                        const materials = Array.isArray(object.material) ? object.material : [object.material];
+                        materials.forEach(mat => mat?.dispose());
+                    }
+                });
+                if (rendererRef.current) { // Check ref before accessing
+                    const currentRenderer = rendererRef.current;
+                    currentRenderer.dispose();
+                    // Use mountPoint ref for removal
+                    if (canvasMountRef.current && currentRenderer.domElement && canvasMountRef.current.contains(currentRenderer.domElement)) {
+                        canvasMountRef.current.removeChild(currentRenderer.domElement);
+                    }
+                }
+                rendererRef.current = null;
+                sceneRef.current = null;
+                cameraRef.current = null;
+                managersRef.current = null;
+            }
 
             // Reset state and attempt flag on unmount
             setLoadingStatus(LoadingStatus.WaitingForDimensions);
@@ -248,9 +249,9 @@ const SpaceShooterGame: React.FC = () => {
             dimensionsRef.current = { width: 0, height: 0 };
             console.log("Setup cleanup finished.");
         };
-    // This effect should only run on mount and unmount
-    // Do NOT add loadingStatus here, internal logic prevents re-runs
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // This effect should only run on mount and unmount
+        // Do NOT add loadingStatus here, internal logic prevents re-runs
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -274,14 +275,15 @@ const SpaceShooterGame: React.FC = () => {
     }, []); // Add listener once
 
     // --- Game Over Handler (Memoized) ---
-    const handleGameOver = useCallback(() => {
-         if (isGameOver) return;
-         setIsGameOver(true);
-         if (managersRef.current) {
-             const isNew = managersRef.current.highScoreManager.setHighScore(score);
-             if (isNew) setHighScore(managersRef.current.highScoreManager.getHighScore());
-         }
-     }, [score, isGameOver]);
+    const handleGameOver = useCallback(async () => {
+        if (isGameOver) return;
+        await endGame(1, score);
+        setIsGameOver(true);
+        if (managersRef.current) {
+            const isNew = managersRef.current.highScoreManager.setHighScore(score);
+            if (isNew) setHighScore(managersRef.current.highScoreManager.getHighScore());
+        }
+    }, [score, isGameOver]);
 
     // --- Collision Detection (Memoized) ---
     const checkCollisions = useCallback(() => {
@@ -290,84 +292,84 @@ const SpaceShooterGame: React.FC = () => {
 
         const { player, bulletManager, enemyManager, explosionManager, powerUpManager } = managersRef.current;
         // ... (rest of collision logic remains the same) ...
-         const bullets = bulletManager.getBullets();
-         const enemies = enemyManager.getEnemies();
-         const playerPos = player.getPosition();
+        const bullets = bulletManager.getBullets();
+        const enemies = enemyManager.getEnemies();
+        const playerPos = player.getPosition();
 
-         // --- Bullet-Enemy ---
-         for (let i = bullets.length - 1; i >= 0; i--) {
-             const bullet = bullets[i];
-             if (!bullet) continue;
-             for (let j = enemies.length - 1; j >= 0; j--) {
-                 const enemy = enemies[j];
-                 if (!enemy) continue;
-                 const dx = bullet.position.x - enemy.position.x;
-                 const dy = bullet.position.y - enemy.position.y;
-                 const distance = Math.sqrt(dx * dx + dy * dy);
-                 if (distance < enemy.radius + bullet.radius) {
-                     const color = (enemy.material instanceof THREE.Material && 'color' in enemy.material) ? enemy.material.color : 0xffffff;
-                     explosionManager.createExplosion(enemy.position.clone(), color as THREE.Color | number);
-                     enemyManager.removeEnemy(j);
-                     bulletManager.removeBullet(i);
-                     setScore(prev => prev + 1);
-                     if (Math.random() < 0.08) powerUpManager.spawnPowerUp();
-                     break;
-                 }
-             }
-         }
-         // --- Player-Enemy ---
-         if (!player.hasShield) {
-             const playerR = 4;
-             for (let k = enemies.length - 1; k >= 0; k--) {
-                 const enemy = enemies[k];
-                 if (!enemy) continue;
-                 const dx = playerPos.x - enemy.position.x;
-                 const dy = playerPos.y - enemy.position.y;
-                 const distance = Math.sqrt(dx * dx + dy * dy);
-                 if (distance < enemy.radius + playerR) {
-                     const color = (enemy.material instanceof THREE.Material && 'color' in enemy.material) ? enemy.material.color : 0xffffff;
-                     explosionManager.createExplosion(enemy.position.clone(), color as THREE.Color | number);
-                     explosionManager.createExplosion(playerPos.clone(), 0x00ffff);
-                     enemyManager.removeEnemy(k);
-                     handleGameOver();
-                     return;
-                 }
-             }
-         }
+        // --- Bullet-Enemy ---
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const bullet = bullets[i];
+            if (!bullet) continue;
+            for (let j = enemies.length - 1; j >= 0; j--) {
+                const enemy = enemies[j];
+                if (!enemy) continue;
+                const dx = bullet.position.x - enemy.position.x;
+                const dy = bullet.position.y - enemy.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < enemy.radius + bullet.radius) {
+                    const color = (enemy.material instanceof THREE.Material && 'color' in enemy.material) ? enemy.material.color : 0xffffff;
+                    explosionManager.createExplosion(enemy.position.clone(), color as THREE.Color | number);
+                    enemyManager.removeEnemy(j);
+                    bulletManager.removeBullet(i);
+                    setScore(prev => prev + 1);
+                    if (Math.random() < 0.08) powerUpManager.spawnPowerUp();
+                    break;
+                }
+            }
+        }
+        // --- Player-Enemy ---
+        if (!player.hasShield) {
+            const playerR = 4;
+            for (let k = enemies.length - 1; k >= 0; k--) {
+                const enemy = enemies[k];
+                if (!enemy) continue;
+                const dx = playerPos.x - enemy.position.x;
+                const dy = playerPos.y - enemy.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < enemy.radius + playerR) {
+                    const color = (enemy.material instanceof THREE.Material && 'color' in enemy.material) ? enemy.material.color : 0xffffff;
+                    explosionManager.createExplosion(enemy.position.clone(), color as THREE.Color | number);
+                    explosionManager.createExplosion(playerPos.clone(), 0x00ffff);
+                    enemyManager.removeEnemy(k);
+                    handleGameOver();
+                    return;
+                }
+            }
+        }
     }, [loadingStatus, handleGameOver]); // Dependency
 
     // --- Game Update Function (Memoized) ---
     const updateGame = useCallback((delta: number) => {
-         if (loadingStatus !== LoadingStatus.Ready || !managersRef.current) return; // Check Ready state
-         const { player, bulletManager, enemyManager, powerUpManager, explosionManager } = managersRef.current;
-         const difficulty = 1 + Math.floor(score / 5) * 0.15;
-         player.update(delta);
-         bulletManager.update(delta, player.getPosition(), true);
-         enemyManager.update(delta, difficulty);
-         powerUpManager.update(delta, bulletManager, player);
-         explosionManager.update(delta);
-         checkCollisions();
-     }, [loadingStatus, score, checkCollisions]); // Dependencies
+        if (loadingStatus !== LoadingStatus.Ready || !managersRef.current) return; // Check Ready state
+        const { player, bulletManager, enemyManager, powerUpManager, explosionManager } = managersRef.current;
+        const difficulty = 1 + Math.floor(score / 5) * 0.15;
+        player.update(delta);
+        bulletManager.update(delta, player.getPosition(), true);
+        enemyManager.update(delta, difficulty);
+        powerUpManager.update(delta, bulletManager, player);
+        explosionManager.update(delta);
+        checkCollisions();
+    }, [loadingStatus, score, checkCollisions]); // Dependencies
 
     // --- Game Loop Logic (Memoized Animation Function) ---
     const animate = useCallback(() => {
         animationFrameIdRef.current = requestAnimationFrame(animate);
-         // Check Ready state and crucial refs for update/render
-         if (loadingStatus !== LoadingStatus.Ready || !managersRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) {
-             // Stop the loop explicitly if conditions aren't met
-             if(animationFrameIdRef.current) {
-                 cancelAnimationFrame(animationFrameIdRef.current);
-                 animationFrameIdRef.current = null;
-                 if(clockRef.current.running) clockRef.current.stop();
-             }
-             return;
-         }
+        // Check Ready state and crucial refs for update/render
+        if (loadingStatus !== LoadingStatus.Ready || !managersRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) {
+            // Stop the loop explicitly if conditions aren't met
+            if (animationFrameIdRef.current) {
+                cancelAnimationFrame(animationFrameIdRef.current);
+                animationFrameIdRef.current = null;
+                if (clockRef.current.running) clockRef.current.stop();
+            }
+            return;
+        }
         const delta = clockRef.current.getDelta();
-         // Add a sanity check for large deltas which can happen when tab is inactive
-         if (delta < 0 || delta > 0.5) {
-             console.warn(`Skipping frame due to large delta: ${delta}`);
-             return;
-         }
+        // Add a sanity check for large deltas which can happen when tab is inactive
+        if (delta < 0 || delta > 0.5) {
+            console.warn(`Skipping frame due to large delta: ${delta}`);
+            return;
+        }
         updateGame(delta);
         rendererRef.current.render(sceneRef.current, cameraRef.current);
     }, [loadingStatus, updateGame]); // Dependencies
@@ -376,18 +378,18 @@ const SpaceShooterGame: React.FC = () => {
     useEffect(() => {
         // Start conditions: Ready state AND not Game Over
         if (loadingStatus === LoadingStatus.Ready && !isGameOver) {
-             console.log("Starting game loop via effect...");
-             if (!clockRef.current.running) clockRef.current.start();
-             if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
-             animationFrameIdRef.current = requestAnimationFrame(animate);
-         }
+            console.log("Starting game loop via effect...");
+            if (!clockRef.current.running) clockRef.current.start();
+            if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
+            animationFrameIdRef.current = requestAnimationFrame(animate);
+        }
         // Stop conditions: Not Ready OR Game Over
         else {
             if (animationFrameIdRef.current) {
-                 console.log(`Stopping game loop via effect (State: ${LoadingStatus[loadingStatus]}, GameOver: ${isGameOver})`);
-                 cancelAnimationFrame(animationFrameIdRef.current);
-                 animationFrameIdRef.current = null;
-                 if (clockRef.current.running) clockRef.current.stop();
+                console.log(`Stopping game loop via effect (State: ${LoadingStatus[loadingStatus]}, GameOver: ${isGameOver})`);
+                cancelAnimationFrame(animationFrameIdRef.current);
+                animationFrameIdRef.current = null;
+                if (clockRef.current.running) clockRef.current.stop();
             }
         }
         return () => {
@@ -420,10 +422,10 @@ const SpaceShooterGame: React.FC = () => {
     }, [loadingStatus]);
 
     // Restart Game stake overlay
-    const handleRestartStake = useCallback(()=>{
+    const handleRestartStake = useCallback(() => {
         if (loadingStatus !== LoadingStatus.Ready || !managersRef.current) return;
         setIsStakeOverlay(true);
-    },[loadingStatus]);
+    }, [loadingStatus]);
 
     // --- Render ---
     const getLoadingMessage = () => {
@@ -453,46 +455,45 @@ const SpaceShooterGame: React.FC = () => {
                 className="absolute inset-0 w-full h-full z-0"
             />
 
-             {/* Loading / Error Indicator (simplified) */}
+            {/* Loading / Error Indicator (simplified) */}
             {isLoading && (
-                 <div className="absolute inset-0 z-20 flex justify-center items-center text-white text-center p-4 bg-[#000510]/80 pointer-events-none">
-                     {getLoadingMessage()}
-                 </div>
+                <div className="absolute inset-0 z-20 flex justify-center items-center text-white text-center p-4 bg-[#000510]/80 pointer-events-none">
+                    {getLoadingMessage()}
+                </div>
             )}
-             {loadingStatus === LoadingStatus.Error && (
-                  <div className="absolute inset-0 z-20 flex justify-center items-center text-red-500 text-center p-4 bg-[#000510]/80 pointer-events-none">
-                      {getLoadingMessage()}
-                  </div>
-             )}
+            {loadingStatus === LoadingStatus.Error && (
+                <div className="absolute inset-0 z-20 flex justify-center items-center text-red-500 text-center p-4 bg-[#000510]/80 pointer-events-none">
+                    {getLoadingMessage()}
+                </div>
+            )}
 
             {/* Game UI - Render only when Ready */}
             {loadingStatus === LoadingStatus.Ready && (
-                 <div className="absolute inset-0 z-10 pointer-events-none"> {/* UI Container */}
-                     {!isGameOver && (
-                         <div className="pointer-events-auto">
-                             <ScoreDisplay score={score} highScore={highScore} />
-                         </div>
-                     )}
-                     {isGameOver && managersRef.current && (
-                         <div className="pointer-events-auto">
+                <div className="absolute inset-0 z-10 pointer-events-none"> {/* UI Container */}
+                    {!isGameOver && (
+                        <div className="pointer-events-auto">
+                            <ScoreDisplay score={score} highScore={highScore} />
+                        </div>
+                    )}
+                    {isGameOver && managersRef.current && (
+                        <div className="pointer-events-auto">
                             {isStakeOverlay &&
-                            <RestartGameOverlay
-                              onGameStartAttempted={handleRestart}/>
-                             ||
-                              <GameOverOverlay
-                              score={score}
-                              highScore={highScore}
-                              isNewHighScore={score > 0 && score === managersRef.current.highScoreManager.getHighScore()}
-                              onRestart={handleRestartStake}
-                              />
+                                <RestartGameOverlay
+                                    onGameStartAttempted={handleRestart} />
+                                ||
+                                <GameOverOverlay
+                                    score={score}
+                                    highScore={highScore}
+                                    isNewHighScore={score > 0 && score === managersRef.current.highScoreManager.getHighScore()}
+                                    onRestart={handleRestartStake}
+                                />
                             }
 
-                         </div>
-                     )}
-                 </div>
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     );
 };
-
 export default SpaceShooterGame;

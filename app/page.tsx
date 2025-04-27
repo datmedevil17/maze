@@ -28,6 +28,8 @@ import {
   nftAddress,
 } from "@/contract/contract";
 
+
+
 export default function Home() {
   const router = useRouter();
   const { signMessageAsync } = useSignMessage();

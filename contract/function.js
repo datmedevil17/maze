@@ -1,16 +1,39 @@
-import { readContract, writeContract, simulateContract } from '@wagmi/core';
-// Assuming configg is your configured wagmi config object
-// Renaming to 'config' for clarity is recommended if possible
-import { tokenABI, tokenAddress, nftABI, nftAddress, gameABI, gameContract } from "./contract";
-import { config } from '@/app/layout';
-// --- Token Contract Functions ---
+// Import necessary functions from @wagmi/core, including getAccount
 
+// src/config/wagmi.ts
+
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import {
+  mainnet,
+  polygon,
+  optimism,
+  arbitrum,
+  base,
+  monadTestnet // Ensure this custom chain is correctly configured
+} from 'wagmi/chains';
+
+import { readContract, writeContract, getAccount } from '@wagmi/core';
+import { tokenABI, tokenAddress, nftABI, nftAddress, gameABI, gameContract } from "./contract";
+
+// --- Token Contract Functions ---
+const wagmiConfig = getDefaultConfig({
+  appName: 'Maze ',
+  projectId: 'YOUR_PROJECT_ID', // !! Remember to replace this !!
+  chains: [mainnet, polygon, optimism, arbitrum, base, monadTestnet],
+  ssr: true, // Keep this if using SSR features with Wagmi/RainbowKit
+});
 /**
  * Registers the connected user with the token contract.
  */
 export const registerUser = async () => {
   try {
-    const result = await writeContract(config, {
+    // Ensure a wallet is connected before trying to write
+    const { address, isConnected } = getAccount(wagmiConfig);
+    if (!isConnected || !address) {
+      throw new Error('Wallet not connected. Cannot register user.');
+    }
+    // No need to pass address explicitly, writeContract uses the connected one
+    const result = await writeContract(wagmiConfig, {
       address: tokenAddress,
       abi: tokenABI,
       functionName: 'register'
@@ -29,7 +52,10 @@ export const registerUser = async () => {
  */
 export const getTokenBalance = async (address) => {
   try {
-    return await readContract(config, { // Pass config as the first argument
+    if (!address) {
+        throw new Error("Address is required to get token balance.");
+    }
+    return await readContract(wagmiConfig, { // Pass wagmiConfig as the first argument
       address: tokenAddress,
       abi: tokenABI,
       functionName: 'balanceOf',
@@ -48,7 +74,13 @@ export const getTokenBalance = async (address) => {
  */
 export const createProfile = async () => {
   try {
-    const result = await writeContract(config, {
+    // Ensure a wallet is connected before trying to write
+    const { address, isConnected } = getAccount(wagmiConfig);
+    if (!isConnected || !address) {
+      throw new Error('Wallet not connected. Cannot create profile.');
+    }
+    // No need to pass address explicitly, writeContract uses the connected one
+    const result = await writeContract(wagmiConfig, {
       address: nftAddress,
       abi: nftABI,
       functionName: 'createProfile'
@@ -67,7 +99,10 @@ export const createProfile = async () => {
  */
 export const checkIfNewUser = async (address) => {
   try {
-    return await readContract(config, { // Pass config as the first argument
+    if (!address) {
+        throw new Error("Address is required to check if new user.");
+    }
+    return await readContract(wagmiConfig, { // Pass wagmiConfig as the first argument
       address: nftAddress,
       abi: nftABI,
       functionName: 'isNewUser',
@@ -83,16 +118,25 @@ export const checkIfNewUser = async (address) => {
 
 /**
  * Starts a game, potentially requiring a deposit.
+ * The transaction is sent by the connected wallet.
  * @param {string | number | bigint} gameId - The identifier for the game.
  * @param {bigint} amount - The amount (e.g., deposit) associated with starting the game.
  */
 export const startGame = async (gameId, amount) => {
   try {
-    const result= await writeContract(config, {
+    // Ensure a wallet is connected before trying to write
+    const { address, isConnected } = getAccount(wagmiConfig);
+    if (!isConnected || !address) {
+      throw new Error('Wallet not connected. Cannot start game.');
+    }
+    // The 'from' address for the transaction will be the connected address
+    const result= await writeContract(wagmiConfig, {
       address: gameContract,
       abi: gameABI,
       functionName: 'startGame',
       args: [gameId, amount],
+      // 'value' might be needed here if the deposit is in native currency (ETH/MATIC etc.)
+      // value: amount // Uncomment and adjust if 'amount' represents native currency deposit
     });
     return result
   } catch (error) {
@@ -102,22 +146,32 @@ export const startGame = async (gameId, amount) => {
 };
 
 /**
- * Ends a game and records the player's score.
+ * Ends a game and records the score for the currently connected player.
  * @param {string | number | bigint} gameId - The identifier for the game.
- * @param {`0x${string}`} player - The address of the player.
  * @param {number | bigint} score - The player's score.
  */
-export const endGame = async (gameId, player, score) => {
+export const endGame = async (gameId, score) => {
   try {
-    const result = await writeContract(config, {
+    // Get the connected account's address
+    const { address: playerAddress, isConnected } = getAccount(wagmiConfig); // Use getAccount
+
+    // Check if a wallet is connected and an address is available
+    if (!isConnected || !playerAddress) {
+      throw new Error('No wallet connected. Please connect your wallet to end the game.');
+    }
+
+    // Call the contract write function, passing the automatically determined player address
+    const result = await writeContract(wagmiConfig, {
       address: gameContract,
       abi: gameABI,
       functionName: 'endGame',
-      args: [gameId, player, score]
+      // Pass the retrieved playerAddress as the second argument
+      args: [gameId, playerAddress, score]
     });
     return result;
   } catch (error) {
     console.error("Error ending game:", error);
+    // Re-throw the error so the caller can handle it if needed
     throw error;
   }
 };
@@ -129,7 +183,7 @@ export const endGame = async (gameId, player, score) => {
  */
 export const getHighScore = async (gameId) => {
   try {
-    return await readContract(config, { // Pass config as the first argument
+    return await readContract(wagmiConfig, { // Pass wagmiConfig as the first argument
       address: gameContract,
       abi: gameABI,
       functionName: 'getHighScore',
@@ -149,7 +203,10 @@ export const getHighScore = async (gameId) => {
  */
 export const getGameDeposit = async (gameId, player) => {
   try {
-    return await readContract(config, { // Pass config as the first argument
+    if (!player) {
+        throw new Error("Player address is required to get game deposit.");
+    }
+    return await readContract(wagmiConfig, { // Pass wagmiConfig as the first argument
       address: gameContract,
       abi: gameABI,
       functionName: 'getDeposit',

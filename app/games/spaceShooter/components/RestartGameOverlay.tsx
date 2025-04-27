@@ -5,7 +5,7 @@ import { startGame } from '@/contract/function'; // Adjust the import path as ne
 interface RestartGameOverlayProps {
     // Function to be called AFTER the startGame transaction is initiated (or potentially completed/failed)
     // You might want to pass transaction details or error status back up
-    onGameStartAttempted: (success: boolean, error?: any) => void;
+    onGameStartAttempted: () => void;
     // Optional: A function to handle closing the overlay if needed (e.g., a cancel button)
     // onClose?: () => void;
 }
@@ -47,17 +47,16 @@ const RestartGameOverlay: React.FC<RestartGameOverlayProps> = ({
             // You might want to wait for the transaction receipt for confirmation
             console.log('Start game transaction sent:', txResponse);
             // Notify parent component that an attempt was made (successfully initiated)
-            onGameStartAttempted(true);
+            onGameStartAttempted();
 
             // Optionally clear amount after successful start,
             // although the parent will likely unmount this overlay anyway.
             // setAmount('');
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Failed to start game:", err);
-            setError(`Failed to start game: ${err.message || 'Please try again.'}`);
-            // Notify parent component about the failure
-            onGameStartAttempted(false, err);
+            const errorMessage = (err as { details?: string })?.details || 'Please try again.';
+            setError(`Failed to start game: ${errorMessage}`);
         } finally {
             setIsStarting(false);
         }
